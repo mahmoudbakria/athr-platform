@@ -1,3 +1,4 @@
+import { type Metadata } from 'next';
 import {
   getCachedCategories,
   getCachedLatestItems,
@@ -22,6 +23,41 @@ export const revalidate = 60;
 
 interface HomeProps {
   searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getCachedSiteConfig();
+
+  const title = config.hero_title ? config.hero_title.replace(/<br\s*\/?>/gi, ' ') : 'Bridge of Good';
+  const description = config.hero_description || 'Join our giving community.';
+  const image = config.hero_image || '/og-image.jpg'; // Fallback image
+
+  return {
+    title: {
+      default: title,
+      template: `%s | ${title}`,
+    },
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function Home({ searchParams }: HomeProps) {
