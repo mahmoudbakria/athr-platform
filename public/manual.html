@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل المطور - منصة أثر | Athr Developer Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            /* Teal 600 */
+            --primary-dark: #0f766e;
+            /* Teal 700 */
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        /* Sections */
+        section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 24px;
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-dark);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        ul,
+        ol {
+            padding-right: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace, sans-serif;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            text-align: right;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* Requirements Grid */
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .req-card {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Folder Map */
+        .folder-tree {
+            list-style: none;
+            padding-right: 0;
+        }
+
+        .folder-tree li {
+            padding: 0.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .folder-icon {
+            color: #fbbf24;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>دليل المطور - منصة أثر</h1>
+            <div class="subtitle">Athr Platform Developer Guide</div>
+        </header>
+
+        <!-- مقدمة -->
+        <section>
+            <h2>👋 مقدمة (Introduction)</h2>
+            <p>
+                أهلاً بك في التوثيق التقني لمنصة "أثر". هذا المشروع هو تطبيق ويب خيري مبني باستخدام أحدث التقنيات لضمان
+                أفضل تجربة للمستخدم وأداء عالٍ. يهدف النظام للربط بين المتبرعين والمحتاجين بكفاءة.
+            </p>
+            <h3>💻 التقنيات المستخدمة (Tech Stack)</h3>
+            <ul>
+                <li><strong>بيئة العمل:</strong> Next.js 14 (App Router)</li>
+                <li><strong>قاعدة البيانات:</strong> Supabase (PostgreSQL)</li>
+                <li><strong>التنسيق:</strong> Tailwind CSS</li>
+                <li><strong>اللغة:</strong> TypeScript</li>
+            </ul>
+        </section>
+
+        <!-- المتطلبات -->
+        <section>
+            <h2>🛠️ المتطلبات (Requirements)</h2>
+            <p>تأكد من توفر الأدوات التالية على جهازك قبل البدء:</p>
+            <div class="req-grid">
+                <div class="req-card">Node.js (v18+)</div>
+                <div class="req-card">Git</div>
+                <div class="req-card">Visual Studio Code</div>
+                <div class="req-card">متصفح حديث (Chrome/Edge)</div>
+            </div>
+            <p>كما تحتاج لإنشاء حساب في منصة <a href="https://supabase.com" target="_blank">Supabase</a> لإنشاء قاعدة
+                البيانات.</p>
+        </section>
+
+        <!-- خطوات التثبيت -->
+        <section>
+            <h2>🚀 خطوات التثبيت (Installation Steps)</h2>
+
+            <h3>1. نسخ المستودع (Clone Repository)</h3>
+            <pre><code>git clone https://github.com/your-repo/athr-app.git
+cd athr-app</code><button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousSibling.textContent)">Copy</button></pre>
+
+            <h3>2. تثبيت المكتبات (Install Dependencies)</h3>
+            <pre><code>npm install</code><button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousSibling.textContent)">Copy</button></pre>
+
+            <h3>3. إعداد البيئة (Environment Setup)</h3>
+            <p>قم بإنشاء ملف <code>.env.local</code> في المجلد الرئيسي وأضف المتغيرات التالية:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المتغير (Variable)</th>
+                        <th>الوصف (Description)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td dir="ltr">NEXT_PUBLIC_SUPABASE_URL</td>
+                        <td>رابط مشروع Supabase الخاص بك.</td>
+                    </tr>
+                    <tr>
+                        <td dir="ltr">NEXT_PUBLIC_SUPABASE_ANON_KEY</td>
+                        <td>المفتاح العام (Anon Key).</td>
+                    </tr>
+                    <tr>
+                        <td dir="ltr">NEXT_PUBLIC_SITE_URL</td>
+                        <td>رابط الموقع (localhost:3000 محلياً).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4. إعداد قاعدة البيانات (Database Setup)</h3>
+            <p>يحتوي المشروع على ملفات SQL جاهزة في مجلد <code>supabase/migrations/</code>. قم بنسخ محتوياتها وتشغيلها
+                في <strong>SQL Editor</strong> داخل لوحة تحكم Supabase.</p>
+
+            <h3>5. التشغيل المحلي (Run Local)</h3>
+            <pre><code>npm run dev</code><button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousSibling.textContent)">Copy</button></pre>
+            <p>افتح الرابط <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>.</p>
+        </section>
+
+        <!-- خريطة المشروع -->
+        <section>
+            <h2>📂 خريطة المشروع (Project Map)</h2>
+            <ul class="folder-tree">
+                <li>
+                    <span class="folder-icon">📁</span>
+                    <div>
+                        <strong>/app</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">يحتوي على جميع صفحات الموقع ومسارات
+                            التوجيه (App Router).</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="folder-icon">📁</span>
+                    <div>
+                        <strong>/components</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">مكونات الواجهة القابلة لإعادة
+                            الاستخدام (UI Components).</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="folder-icon">📁</span>
+                    <div>
+                        <strong>/lib</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">دوال مساعدة (Utils) وإعداد عميل
+                            Supabase.</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="folder-icon">📁</span>
+                    <div>
+                        <strong>/supabase</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">ملفات التهجير (Migrations) الخاصة
+                            بقاعدة البيانات.</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="folder-icon">📄</span>
+                    <div>
+                        <strong>manual.html</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">أنت هنا! (هذا الملف).</div>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- الرفع والنشر -->
+        <section>
+            <h2>☁️ النشر (Deployment)</h2>
+            <p>أسهل طريقة لنشر المشروع هي باستخدام <strong>Vercel</strong>:</p>
+            <ol>
+                <li>ارفع الكود إلى حسابك في <strong>GitHub</strong>.</li>
+                <li>اذهب إلى <a href="https://vercel.com/new">Vercel Dashboard</a> واعمل Import للمشروع.</li>
+                <li>أضف المتغيرات البيئية (Environment Variables) التي في ملف <code>.env.local</code>.</li>
+                <li>اضغط <strong>Deploy</strong>.</li>
+            </ol>
+        </section>
+
+        <footer>
+            <p>© 2024 منصة أثر - تمت برمجة الموقع من محمود بكريه ❤️</p>
+        </footer>
+    </div>
+</body>
+
+</html>

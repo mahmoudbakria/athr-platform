@@ -1,0 +1,16 @@
+{
+    "HomePage": {
+        "title": "Lift the Burden, Share the Reward",
+        "description": "Join our community of giving. Donate items you no longer need or find support when you need it most.",
+        "cta": "Browse Items",
+        "cta_secondary": "Donate Item"
+    },
+    "Navigation": {
+        "home": "Home",
+        "listings": "Browse Items",
+        "appeals": "Appeals",
+        "volunteer": "Volunteer Delivery",
+        "login": "Login",
+        "profile": "Profile"
+    }
+}
