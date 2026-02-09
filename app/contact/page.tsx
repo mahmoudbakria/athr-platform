@@ -27,7 +27,7 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-right">البريد الإلكتروني</h3>
-                                <p className="text-muted-foreground text-right">support@bridgeofgood.com</p>
+                                <p className="text-muted-foreground text-right">support@athrk.com</p>
                             </div>
                         </div>
 
@@ -37,7 +37,7 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-right">الهاتف</h3>
-                                <p className="text-muted-foreground text-right">+1 (555) 123-4567</p>
+                                <p className="text-muted-foreground text-right">0525485457,0522030697</p>
                             </div>
                         </div>
 
@@ -46,10 +46,10 @@ export default function ContactPage() {
                                 <MapPin className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-right">المكتب</h3>
+                                <h3 className="font-semibold text-right">العنوان</h3>
                                 <p className="text-muted-foreground text-right">
-                                    123 شارع الخير<br />
-                                    مدينة اللطف، 90210
+                                    عرابة<br />
+                                    
                                 </p>
                             </div>
                         </div>
