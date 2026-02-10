@@ -137,7 +137,7 @@ export default async function AppealDetails(props: { params: Params }) {
                                 <ShareButton
                                     title={appeal.title}
                                     text={`يرجى المساهمة في هذا النداء: ${appeal.title}`}
-                                    url={`${siteConfig.url}/appeals/${appeal.id}`}
+                                    url={`${siteConfig.url.replace(/\/$/, "")}/appeals/${appeal.id}`}
                                     variant="outline"
                                     size="lg"
                                     className="w-full md:w-auto"

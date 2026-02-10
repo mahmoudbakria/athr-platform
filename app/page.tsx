@@ -13,6 +13,7 @@ import { LatestItems } from '@/components/home/LatestItems';
 import { CategoryGroupedList } from '@/components/home/CategoryGroupedList';
 import { Banner } from '@/components/home/Banner';
 import { DualBanner } from '@/components/home/DualBanner';
+import { siteConfig as staticSiteConfig } from '@/config/site';
 import dynamic from 'next/dynamic';
 
 const ImpactStrip = dynamic(() => import('@/components/home/ImpactStrip').then(m => m.ImpactStrip), {
@@ -28,9 +29,9 @@ interface HomeProps {
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getCachedSiteConfig();
 
-  const title = config.hero_title ? config.hero_title.replace(/<br\s*\/?>/gi, ' ') : 'Bridge of Good';
-  const description = config.hero_description || 'Join our giving community.';
-  const image = config.hero_image || '/og-image.jpg'; // Fallback image
+  const title = config.hero_title ? config.hero_title.replace(/<br\s*\/?>/gi, ' ') : staticSiteConfig.name;
+  const description = config.hero_description || staticSiteConfig.description;
+  const image = config.hero_image || staticSiteConfig.ogImage; // Fallback to site logo/og image
 
   return {
     title: {
@@ -43,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: image,
+          url: new URL(image, staticSiteConfig.url).toString(),
           width: 1200,
           height: 630,
           alt: title,
@@ -55,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title,
       description,
-      images: [image],
+      images: [new URL(image, staticSiteConfig.url).toString()],
     },
   };
 }

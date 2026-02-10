@@ -220,7 +220,7 @@ export default async function ItemDetails(props: { params: Params }) {
                                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{item.title}</h1>
                                 <ShareButton
                                     title={item.title}
-                                    url={`${siteConfig.url}/items/${item.id}`}
+                                    url={`${siteConfig.url.replace(/\/$/, "")}/items/${item.id}`}
                                     text={`Check out this item: ${item.title}`}
                                     className="shrink-0"
                                 />

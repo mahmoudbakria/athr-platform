@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: staticSiteConfig.name,
     images: [
       {
-        url: staticSiteConfig.ogImage,
+        url: new URL(staticSiteConfig.ogImage, staticSiteConfig.url).toString(),
         width: 1200,
         height: 630,
         alt: staticSiteConfig.name,
