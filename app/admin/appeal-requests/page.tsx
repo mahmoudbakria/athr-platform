@@ -14,7 +14,13 @@ export default async function AdminAppealsPage() {
     try {
         const { data: appeals, error: supabaseError } = await supabase
             .from('appeals')
-            .select('*')
+            .select(`
+                *,
+                profiles (
+                    full_name,
+                    email
+                )
+            `)
             .order('created_at', { ascending: false })
 
         if (supabaseError) throw supabaseError

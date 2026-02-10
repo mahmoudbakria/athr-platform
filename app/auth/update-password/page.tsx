@@ -31,7 +31,7 @@ export default function UpdatePasswordPage() {
             toast.error(state.error)
         }
         if (state.success) {
-            toast.success("Password updated successfully")
+            toast.success("تم تحديث كلمة المرور بنجاح")
             // Redirect after a short delay
             setTimeout(() => {
                 router.push("/auth/login")
@@ -40,25 +40,25 @@ export default function UpdatePasswordPage() {
     }, [state.error, state.success, router])
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-muted/20 p-4">
-            <Card className="w-full max-w-md shadow-lg border-0 sm:border">
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-muted/20 p-4" dir="rtl">
+            <Card className="w-full max-w-md shadow-lg border-0 sm:border text-right">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Update password</CardTitle>
+                    <CardTitle className="text-2xl font-bold">تحديث كلمة المرور</CardTitle>
                     <CardDescription>
-                        Enter your new password below.
+                        أدخل كلمة المرور الجديدة أدناه.
                     </CardDescription>
                 </CardHeader>
                 <form action={formAction}>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="password">New Password</Label>
-                            <Input id="password" name="password" type="password" required minLength={6} />
+                            <Label htmlFor="password">كلمة المرور الجديدة</Label>
+                            <Input id="password" name="password" type="password" required minLength={6} className="text-right" />
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4">
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            {isPending ? 'Updating...' : 'Update Password'}
+                            {isPending ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
                         </Button>
                     </CardFooter>
                 </form>

@@ -30,46 +30,46 @@ export default function ForgotPasswordPage() {
             toast.error(state.error)
         }
         if (state.success) {
-            toast.success("Reset link sent! Check your email.")
+            toast.success("تم إرسال رابط إعادة تعيين كلمة المرور! تحقق من بريدك الإلكتروني.")
         }
     }, [state.error, state.success])
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-muted/20 p-4">
-            <Card className="w-full max-w-md shadow-lg border-0 sm:border">
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-muted/20 p-4" dir="rtl">
+            <Card className="w-full max-w-md shadow-lg border-0 sm:border text-right">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Forgot password</CardTitle>
+                    <CardTitle className="text-2xl font-bold">نسيت كلمة المرور</CardTitle>
                     <CardDescription>
-                        Enter your email address and we will send you a link to reset your password
+                        أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور
                     </CardDescription>
                 </CardHeader>
                 {state.success ? (
                     <CardContent className="space-y-4">
                         <div className="rounded-md bg-green-50 p-4 border border-green-200 text-green-800 text-sm">
-                            <p className="font-medium">Check your email</p>
-                            <p>We have sent a password reset link to your email address.</p>
+                            <p className="font-medium">تحقق من بريدك الإلكتروني</p>
+                            <p>لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</p>
                         </div>
                         <Button asChild className="w-full" variant="outline">
-                            <Link href="/auth/login">Back to Login</Link>
+                            <Link href="/auth/login">العودة لتسجيل الدخول</Link>
                         </Button>
                     </CardContent>
                 ) : (
                     <form action={formAction}>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                                <Label htmlFor="email">البريد الإلكتروني</Label>
+                                <Input id="email" name="email" type="email" placeholder="m@example.com" required className="text-right" />
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
                             <Button type="submit" className="w-full" disabled={isPending}>
                                 {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                {isPending ? 'Sending link...' : 'Send Reset Link'}
+                                {isPending ? 'جاري الإرسال...' : 'إرسال رابط إعادة التعيين'}
                             </Button>
                             <Button asChild variant="link" className="px-0 font-normal">
-                                <Link href="/auth/login" className="flex items-center text-muted-foreground hover:text-foreground">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Login
+                                <Link href="/auth/login" className="flex items-center text-muted-foreground hover:text-foreground gap-2">
+                                    <ArrowLeft className="h-4 w-4" />
+                                    العودة لتسجيل الدخول
                                 </Link>
                             </Button>
                         </CardFooter>

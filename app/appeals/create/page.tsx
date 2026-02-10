@@ -21,8 +21,19 @@ export default function CreateAppealPage() {
     const [isSuccess, setIsSuccess] = useState(false)
 
     useEffect(() => {
-        const checkSettings = async () => {
+        const checkAuthAndSettings = async () => {
             const supabase = createClient()
+
+            // Check authentication first
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (!user) {
+                const encodedError = encodeURIComponent("يجب تسجيل الدخول لتقديم طلب مساعدة")
+                router.push(`/login?next=/appeals/create&error=${encodedError}`)
+                return
+            }
+
+            // Check settings
             const { data: settings } = await supabase
                 .from('system_settings')
                 .select('key, value')
@@ -43,7 +54,7 @@ export default function CreateAppealPage() {
                 return
             }
         }
-        checkSettings()
+        checkAuthAndSettings()
     }, [router])
 
     useEffect(() => {

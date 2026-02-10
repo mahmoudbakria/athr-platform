@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { Item } from '@/types'
 
 // Helper to check admin/mod permissions
@@ -98,6 +98,7 @@ export async function updateItemStatus(itemId: string, status: 'active' | 'rejec
     revalidatePath('/admin/moderation')
     revalidatePath('/admin')
     revalidatePath('/admin/items')
+    revalidatePath('/', 'layout')
 }
 
 export async function toggleItemUrgency(itemId: string, isUrgent: boolean) {
@@ -163,6 +164,7 @@ export async function adminUpdateItem(itemId: string, formData: FormData) {
     if (error) return { error: error.message }
     revalidatePath(`/admin/items`)
     revalidatePath(`/admin/items/${itemId}/edit`)
+    revalidatePath('/', 'layout')
     return { success: true }
 }
 
@@ -204,4 +206,5 @@ export async function deleteItem(itemId: string) {
 
     revalidatePath('/admin/items')
     revalidatePath('/my-items')
+    revalidatePath('/', 'layout')
 }

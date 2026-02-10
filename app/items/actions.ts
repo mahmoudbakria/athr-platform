@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/lib/supabase-server"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 
 export async function markItemAsDonated(itemId: string) {
     const supabase = await createClient()
@@ -90,6 +90,7 @@ export async function markItemAsDonated(itemId: string) {
 
     revalidatePath('/my-items')
     revalidatePath(`/items/${itemId}`)
+    revalidatePath('/', 'layout')
 }
 
 export async function createItem(itemData: any) {

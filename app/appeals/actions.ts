@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -47,6 +48,34 @@ export async function createAppeal(prevState: any, formData: FormData) {
     const valResult = appealSchema.safeParse(rawData)
     if (!valResult.success) {
         return { error: valResult.error.issues[0].message, success: false }
+    }
+
+    // Ensure Profile Exists (Fix for 'Unknown' user)
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+    if (!profile) {
+        // Profile missing? Create it from user metadata using Admin Client
+        const adminClient = createAdminClient()
+
+        // Fetch user via admin to ensure we have metadata
+        const { data: { user: adminUser }, error: userError } = await adminClient.auth.admin.getUserById(user.id)
+
+        if (adminUser) {
+            const fullName = adminUser.user_metadata?.full_name || adminUser.email?.split('@')[0] || 'User'
+
+            await adminClient
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    full_name: fullName,
+                    email: adminUser.email,
+                    updated_at: new Date().toISOString(),
+                })
+        }
     }
 
     const { data, error } = await supabase
@@ -152,5 +181,83 @@ export async function updateAppeal(id: string, prevState: any, formData: FormDat
     } catch (err: any) {
         console.error("[updateAppeal] Unexpected Error:", err)
         return { error: "Failed to update appeal. Please try again.", success: false }
+    }
+}
+
+export async function deleteAppeal(id: string) {
+    const supabase = await createClient()
+
+    try {
+        console.log("[deleteAppeal] Starting deletion for ID:", id)
+
+        // 1. Auth Check
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+            console.log("[deleteAppeal] No user found")
+            return { error: "You must be logged in to delete an appeal.", success: false }
+        }
+        console.log("[deleteAppeal] User authenticated:", user.id)
+
+        // 2. Fetch appeal to check ownership
+        // Use admin client to ensure we can read even if RLS somehow blocks read (unlikely but safe)
+        const adminClient = createAdminClient()
+
+        const { data: existingAppeal, error: fetchError } = await adminClient
+            .from('appeals')
+            .select('user_id')
+            .eq('id', id)
+            .single()
+
+        if (fetchError || !existingAppeal) {
+            console.error("[deleteAppeal] Appeal fetch error:", fetchError)
+            return { error: "Appeal not found.", success: false }
+        }
+        console.log("[deleteAppeal] Appeal found, owner:", existingAppeal.user_id)
+
+        // Check if user is admin/mod
+        const isAdmin = await (async () => {
+            const { data: rpcData } = await supabase.rpc('is_admin_or_mod')
+            return !!rpcData
+        })()
+        console.log("[deleteAppeal] Is Admin:", isAdmin)
+
+        if (existingAppeal.user_id !== user.id && !isAdmin) {
+            console.log("[deleteAppeal] Permission denied. Owner:", existingAppeal.user_id, "Requester:", user.id)
+            return { error: "You are not authorized to delete this appeal.", success: false }
+        }
+
+        if (isAdmin) {
+            // Admin: Permanent Delete
+            const { error } = await adminClient
+                .from('appeals')
+                .delete()
+                .eq('id', id)
+
+            if (error) {
+                console.error("[deleteAppeal] DB Delete Error:", error)
+                throw error
+            }
+            console.log("[deleteAppeal] Appeal permanently deleted by admin")
+        } else {
+            // User: Soft Delete (Update status to 'deleted')
+            const { error } = await adminClient
+                .from('appeals')
+                .update({ status: 'deleted' })
+                .eq('id', id)
+
+            if (error) {
+                console.error("[deleteAppeal] DB Soft Delete Error:", error)
+                throw error
+            }
+            console.log("[deleteAppeal] Appeal soft deleted by user")
+        }
+
+        revalidatePath('/my-appeals')
+        revalidatePath('/admin/appeals')
+        revalidatePath('/appeals')
+        return { success: true, error: null }
+    } catch (err: any) {
+        console.error("[deleteAppeal] Unexpected Error:", err)
+        return { error: `Failed to delete appeal: ${err.message || 'Unknown error'}`, success: false }
     }
 }

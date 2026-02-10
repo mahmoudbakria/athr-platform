@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { siteConfig } from '@/config/site'
@@ -54,6 +55,12 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
+
+    const next = formData.get('next') as string
+    if (next && next.startsWith('/')) {
+        redirect(next)
+    }
+
     redirect('/')
 }
 
@@ -67,7 +74,7 @@ export async function logout() {
 export async function resetPassword(email: string) {
     const supabase = await createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteConfig.url}/auth/update-password`,
+        redirectTo: `${siteConfig.url}/auth/confirm?next=/auth/update-password`,
     })
 
     if (error) {
@@ -90,7 +97,7 @@ export async function updatePassword(password: string) {
 }
 
 export async function getGoogleAuthSetting() {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // We assume the table is 'platform_settings' and keys are used.
     // If the table structure is different, this needs adjustment.
@@ -131,3 +138,4 @@ export async function signInWithGoogle() {
 
     return { error: 'No URL returned' }
 }
+

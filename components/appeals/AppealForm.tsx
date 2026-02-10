@@ -12,8 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Loader2 } from 'lucide-react'
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase"
+import { useState } from "react"
 
 interface AppealFormProps {
     initialData?: {
@@ -29,27 +28,17 @@ interface AppealFormProps {
     submitLabel?: string
 }
 
+const categories = [
+    'Medical',
+    'Financial',
+    'Education',
+    'Food',
+    'Debt',
+    'Home',
+    'Other'
+]
+
 export function AppealForm({ initialData, action, isPending, submitLabel = "إرسال الطلب" }: AppealFormProps) {
-    const [categories, setCategories] = useState<{ id: string, name: string }[]>([])
-    const [loadingCategories, setLoadingCategories] = useState(true)
-
-    // useEffect(() => {
-    //     const fetchCategories = async () => {
-    //         const supabase = createClient()
-    //         const { data } = await supabase
-    //             .from('appeal_categories')
-    //             .select('id, name')
-    //             .eq('is_active', true)
-    //             .order('name')
-
-    //         if (data) {
-    //             setCategories(data)
-    //         }
-    //         setLoadingCategories(false)
-    //     }
-    //     fetchCategories()
-    // }, [])
-
     return (
         <form action={action} className="space-y-6 text-right" dir="rtl">
             <div className="space-y-2">
@@ -64,21 +53,21 @@ export function AppealForm({ initialData, action, isPending, submitLabel = "إر
                 />
             </div>
 
-            {/* <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="category">التصنيف *</Label>
                 <Select name="category" required defaultValue={initialData?.category}>
                     <SelectTrigger>
-                        <SelectValue placeholder={loadingCategories ? "جاري تحميل التصنيفات..." : "اختر تصنيفاً"} />
+                        <SelectValue placeholder="اختر تصنيفاً" />
                     </SelectTrigger>
                     <SelectContent>
                         {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                                {cat.name}
+                            <SelectItem key={cat} value={cat}>
+                                {cat}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
-            </div> */}
+            </div>
 
             <div className="space-y-2">
                 <Label htmlFor="city">المدينة / المنطقة *</Label>
@@ -86,7 +75,7 @@ export function AppealForm({ initialData, action, isPending, submitLabel = "إر
                     id="city"
                     name="city"
                     defaultValue={initialData?.city}
-                    placeholder="مثلاً: غزة، رفح، نابلس"
+                    placeholder="مثلاً: عرابة، ديرحنا"
                     required
                     minLength={2}
                 />
@@ -131,7 +120,7 @@ export function AppealForm({ initialData, action, isPending, submitLabel = "إر
             </div>
 
             <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isPending || loadingCategories} className="w-full md:w-auto">
+                <Button type="submit" disabled={isPending} className="w-full md:w-auto">
                     {isPending ? (
                         <>
                             <Loader2 className="ml-2 h-4 w-4 animate-spin" />

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { login, signup, getGoogleAuthSetting, signInWithGoogle } from "@/app/auth/actions"
 import Link from "next/link"
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
 import { FcGoogle } from "react-icons/fc"
 import { Loader2 } from "lucide-react"
@@ -16,6 +16,7 @@ import { useSearchParams } from "next/navigation"
 
 const initialState = {
     error: '',
+    success: false
 }
 
 export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?: 'login' | 'signup', errorMessage?: string }) {
@@ -24,6 +25,7 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
     const [googleLoading, setGoogleLoading] = useState(false)
     const searchParams = useSearchParams()
     const next = searchParams.get('next')
+    const lastToastRef = useRef<string | null>(null)
 
     // Login Action State
     const [loginState, loginAction, loginPending] = useActionState(async (prevState: any, formData: FormData) => {
@@ -39,13 +41,15 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
         return { error: '' }
     }, initialState)
 
+
     useEffect(() => {
         getGoogleAuthSetting().then(setEnableGoogle)
     }, [])
 
     useEffect(() => {
-        if (errorMessage) {
-            toast.error(errorMessage)
+        if (errorMessage && lastToastRef.current !== errorMessage) {
+            toast.error(errorMessage, { id: 'auth-error' })
+            lastToastRef.current = errorMessage
         }
     }, [errorMessage])
 
@@ -60,7 +64,7 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
             const result = await signInWithGoogle()
             if (result?.error) toast.error(result.error)
         } catch (error) {
-            toast.error("Failed to initiate Google login")
+            toast.error("فشل في بدء تسجيل الدخول عبر Google")
         } finally {
             setGoogleLoading(false)
         }
@@ -91,7 +95,7 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
                                 {next && <input type="hidden" name="next" value={next} />}
                                 <div className="space-y-2">
                                     <Label htmlFor="email">البريد الإلكتروني</Label>
-                                    <Input id="email" name="email" type="email" placeholder="example@mail.com" required />
+                                    <Input id="email" name="email" type="email" placeholder="بريدك الإلكتروني" required className="text-right" />
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
@@ -103,7 +107,7 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
                                             نسيت كلمة المرور؟
                                         </Link>
                                     </div>
-                                    <Input id="password" name="password" type="password" required />
+                                    <Input id="password" name="password" type="password" required className="text-right" />
                                 </div>
                                 <Button type="submit" className="w-full" disabled={loginPending}>
                                     {loginPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -114,23 +118,24 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
 
                         <TabsContent value="signup">
                             <form action={signupAction} className="space-y-4">
+                                {next && <input type="hidden" name="next" value={next} />}
                                 <div className="space-y-2">
                                     <Label htmlFor="full_name">الاسم الكامل</Label>
-                                    <Input id="full_name" name="full_name" placeholder="الاسم هنا" required />
+                                    <Input id="full_name" name="full_name" placeholder="الاسم هنا" required className="text-right" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="signup-email">البريد الإلكتروني</Label>
-                                        <Input id="signup-email" name="email" type="email" placeholder="example@mail.com" required />
+                                        <Input id="signup-email" name="email" type="email" placeholder="example@mail.com" required className="text-right" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">الهاتف</Label>
-                                        <Input id="phone" name="phone" type="tel" placeholder="+970..." />
+                                        <Input id="phone" name="phone" type="tel" placeholder="+970..." className="text-right" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="signup-password">كلمة المرور</Label>
-                                    <Input id="signup-password" name="password" type="password" required minLength={6} />
+                                    <Input id="signup-password" name="password" type="password" required minLength={6} className="text-right" />
                                 </div>
                                 <Button type="submit" className="w-full" disabled={signupPending}>
                                     {signupPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

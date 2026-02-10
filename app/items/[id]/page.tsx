@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
+import { ShareButton } from '@/components/shared/ShareButton'
+import { siteConfig } from '@/config/site'
 import { getCachedItemById, getCachedRelatedVolunteers, getCachedSystemSettings } from '@/lib/fetchers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -56,7 +58,7 @@ export async function generateMetadata(props: { params: Params }) {
 
     const imageUrl = item.images && item.images.length > 0
         ? item.images[0]
-        : '/og-image.jpg' // Fallback
+        : siteConfig.ogImage // Fallback
 
     return {
         title: `${item.title} | خير`,
@@ -214,7 +216,15 @@ export default async function ItemDetails(props: { params: Params }) {
                                 </Badge>
                             </div>
 
-                            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{item.title}</h1>
+                            <div className="flex justify-between items-start gap-4">
+                                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{item.title}</h1>
+                                <ShareButton
+                                    title={item.title}
+                                    url={`${siteConfig.url}/items/${item.id}`}
+                                    text={`Check out this item: ${item.title}`}
+                                    className="shrink-0"
+                                />
+                            </div>
 
                             <div className="flex flex-col gap-2 text-muted-foreground text-sm">
                                 <div className="flex items-center gap-2">

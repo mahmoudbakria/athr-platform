@@ -1,7 +1,6 @@
-'use client'
 
-import { AuthForm } from "@/components/auth/AuthForm"
+import { redirect } from "next/navigation"
 
 export default function LoginPage() {
-    return <AuthForm initialMode="login" />
+    redirect('/login')
 }

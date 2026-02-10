@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Search, MapPin, Filter, Calendar, HandHelping, Info, CheckCircle2, HeartHandshake, X, Loader2, Trash2, Pencil } from 'lucide-react'
 import { EditAppealDialog } from './EditAppealDialog'
+import { deleteAppeal } from '@/app/appeals/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +37,8 @@ import { createClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ShareButton } from '@/components/shared/ShareButton'
+import { siteConfig } from '@/config/site'
 
 interface AppealsFeedProps {
     initialAppeals: any[]
@@ -115,19 +118,17 @@ export function AppealsFeed({ initialAppeals, viewMode = 'public' }: AppealsFeed
     const handleDelete = async (id: string) => {
         try {
             setIsDeleting(id)
-            const supabase = createClient()
-            const { error } = await supabase
-                .from('appeals')
-                .delete()
-                .eq('id', id)
+            const result = await deleteAppeal(id) // Use Server Action
 
-            if (error) throw error
+            if (result.error) {
+                throw new Error(result.error)
+            }
 
             setAppeals(prev => prev.filter(a => a.id !== id))
             toast.success('تم حذف النداء بنجاح')
-        } catch (error) {
+        } catch (error: any) {
             console.error('Delete error:', error)
-            toast.error('فشل في حذف النداء')
+            toast.error(error.message || 'فشل في حذف النداء')
         } finally {
             setIsDeleting(null)
         }
@@ -410,6 +411,16 @@ export function AppealsFeed({ initialAppeals, viewMode = 'public' }: AppealsFeed
                                                     {appeal.title}
                                                 </DialogTitle>
                                             </DialogHeader>
+
+                                            <div className="flex justify-end mb-4">
+                                                <ShareButton
+                                                    title={appeal.title}
+                                                    text={`يرجى المساهمة في هذا النداء: ${appeal.title}`}
+                                                    url={`${siteConfig.url}/appeals/${appeal.id}`}
+                                                    variant="outline"
+                                                    size="sm"
+                                                />
+                                            </div>
 
                                             <div className="prose prose-slate max-w-none mb-6 md:mb-10">
                                                 <div className="p-5 md:p-8 bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] text-sm md:text-lg leading-relaxed text-slate-600 whitespace-pre-wrap border border-slate-100/50 shadow-inner">
