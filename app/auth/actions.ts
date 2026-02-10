@@ -41,6 +41,7 @@ export async function signup(formData: FormData) {
         password: formData.get('password') as string,
         phone: formData.get('phone') as string,
         options: {
+            emailRedirectTo: 'https://www.athrk.com/auth/callback',
             data: {
                 full_name: formData.get('full_name') as string,
                 phone: formData.get('phone') as string,
@@ -74,7 +75,7 @@ export async function logout() {
 export async function resetPassword(email: string) {
     const supabase = await createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteConfig.url}/auth/confirm?next=/auth/update-password`,
+        redirectTo: 'https://www.athrk.com/auth/update-password',
     })
 
     if (error) {
