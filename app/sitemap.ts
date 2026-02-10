@@ -7,7 +7,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient()
-    const baseUrl = siteConfig.url
+
+    // تنظيف الرابط الأساسي لضمان عدم وجود مائل زائدة في النهاية
+    const baseUrl = siteConfig.url.endsWith('/')
+        ? siteConfig.url.slice(0, -1)
+        : siteConfig.url
 
     // 1. Static Routes
     const routes = [
@@ -57,3 +61,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...routes, ...categoryRoutes, ...itemRoutes]
 }
+
