@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/lib/supabase-server"
-import { revalidatePath, revalidateTag } from "next/cache"
+import { revalidatePath } from "next/cache"
 
 export async function markItemAsDonated(itemId: string) {
     const supabase = await createClient()

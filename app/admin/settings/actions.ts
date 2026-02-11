@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase-server'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { requireAdminOrMod } from '@/lib/auth-guard'
 
 export async function updateSetting(key: string, value: boolean) {
@@ -23,7 +23,7 @@ export async function updateSetting(key: string, value: boolean) {
 
     revalidatePath('/admin/settings')
     revalidatePath('/', 'layout')
-    revalidateTag('settings')
+
     return { success: true }
 }
 
