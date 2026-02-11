@@ -178,7 +178,7 @@ export async function updateAppealStatus(appealId: string, status: 'approved' | 
 
     if (error) throw new Error(error.message)
 
-    revalidatePath('/admin/appeals')
+    revalidatePath('/admin/appeal-requests')
 }
 
 export async function deleteAppeal(appealId: string) {
@@ -191,7 +191,7 @@ export async function deleteAppeal(appealId: string) {
 
     if (error) throw new Error(error.message)
 
-    revalidatePath('/admin/appeals')
+    revalidatePath('/admin/appeal-requests')
 }
 
 export async function deleteItem(itemId: string) {

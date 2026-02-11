@@ -38,7 +38,7 @@ const sidebarItems = [
     { href: '/admin/items', label: 'All Items', icon: Package },
     { href: '/admin/appeal-requests', label: 'Appeals Requests', icon: HeartHandshake },
     { href: '/admin/volunteers', label: 'Volunteer Deliveries', icon: Truck },
-    { href: '/admin/appeals/categories', label: 'Appeal Categories', icon: Folder },
+    { href: '/admin/appeal-requests/categories', label: 'Appeal Categories', icon: Folder },
     { href: '/admin/reports', label: 'Reports & Analytics', icon: BarChart3 },
 ];
 

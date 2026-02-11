@@ -41,8 +41,9 @@ export async function generateMetadata(props: { params: Params }) {
         const supabase = await createClient()
         const { data: privItem } = await supabase
             .from('items')
-            .select('title, description, images')
-            .eq('id', id)
+            .select('title, description, images, item_number')
+            .select('title, description, images, item_number')
+            .eq(id.match(/^\d+$/) ? 'item_number' : 'id', id)
             .single()
 
         if (privItem) {
@@ -100,11 +101,11 @@ export default async function ItemDetails(props: { params: Params }) {
             .select(`
                 id, title, description, images, created_at, city,
                 latitude, longitude, user_id, status, condition,
-                delivery_available, needs_repair, contact_phone, tags,
+                delivery_available, needs_repair, contact_phone, tags, item_number,
                 categories(name, slug),
                 sub_categories(name)
             `)
-            .eq('id', id)
+            .eq(id.match(/^\d+$/) ? 'item_number' : 'id', id)
             .single()
 
         if (privItem) {
@@ -117,30 +118,45 @@ export default async function ItemDetails(props: { params: Params }) {
     }
 
     // Feature Flags
-    const featureEnabled = settingsData?.find(s => s.key === 'feature_volunteer_delivery')?.value ?? true
-    const showRelatedEnabled = settingsData?.find(s => s.key === 'feature_item_related_volunteers')?.value ?? true
+    // Helper to safely check boolean setting
+    const checkSetting = (key: string) => {
+        const setting = settingsData?.find(s => s.key === key)
+        if (!setting) return true // Default to true if setting missing
+        const val = setting.value
+        return val === true || val === 'true' || val === null || val === undefined
+    }
+
+    const featureEnabled = checkSetting('feature_volunteer_delivery')
+    const showRelatedEnabled = checkSetting('feature_item_related_volunteers')
     const isVolunteerEnabled = featureEnabled && showRelatedEnabled
 
     // 3. Profiles & Volunteers
     const volunteerPromise = (isVolunteerEnabled && item.city)
-        ? getCachedRelatedVolunteers(item.city)
+        ? getCachedRelatedVolunteers(item.city.trim())
         : Promise.resolve([])
 
-    const profilePromise = supabase
-        .from('profiles')
-        .select('full_name, avatar_url, show_avatar, email, phone')
-        .eq('id', item.user_id)
-        .single()
+    const profilePromise = item.user_id
+        ? supabase
+            .from('profiles')
+            .select('full_name, avatar_url, show_avatar, email, phone')
+            .eq('id', item.user_id)
+            .single()
+        : Promise.resolve({ data: null })
 
     const [relatedVolunteers, profileRes] = await Promise.all([volunteerPromise, profilePromise])
     const profile = profileRes.data
 
     const whatsappLink = `https://wa.me/${item.contact_phone}?text=${encodeURIComponent(`مرحباً، أنا مهتم بغرض: ${item.title}`)}`
-    const emailLink = profile?.email ? `mailto:${profile.email}?subject=${encodeURIComponent(`استفسار حول: ${item.title}`)}` : '#'
+
+    // Determine contact email (Profile email or Guest email)
+    const contactEmail = profile?.email || (item as any).guest_email
+    const emailLink = contactEmail ? `mailto:${contactEmail}?subject=${encodeURIComponent(`استفسار حول: ${item.title}`)}` : '#'
 
     // Donor Display Logic
-    const showAvatar = profile?.show_avatar ?? true
-    const donorName = profile?.full_name || 'متبرع فاعل خير'
+    const isGuest = !item.user_id
+    const showAvatar = isGuest ? true : (profile?.show_avatar ?? true)
+    const donorName = isGuest ? ((item as any).guest_name || 'زائر') : (profile?.full_name || 'متبرع فاعل خير')
+
     const donorInitials = donorName
         .split(' ')
         .map((n: string) => n[0])
@@ -217,10 +233,17 @@ export default async function ItemDetails(props: { params: Params }) {
                             </div>
 
                             <div className="flex justify-between items-start gap-4">
-                                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{item.title}</h1>
+                                <div>
+                                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{item.title}</h1>
+                                    {item.item_number && (
+                                        <span className="text-lg text-muted-foreground font-medium mt-1 block">
+                                            #{item.item_number}
+                                        </span>
+                                    )}
+                                </div>
                                 <ShareButton
                                     title={item.title}
-                                    url={`${siteConfig.url.replace(/\/$/, "")}/items/${item.id}`}
+                                    url={`${siteConfig.url.replace(/\/$/, "")}/items/${item.item_number || item.id}`}
                                     text={`Check out this item: ${item.title}`}
                                     className="shrink-0"
                                 />
@@ -293,9 +316,16 @@ export default async function ItemDetails(props: { params: Params }) {
                                     </Avatar>
                                     <div>
                                         <p className="text-sm text-muted-foreground font-medium">تبرع بواسطة</p>
-                                        <Link href={`/listings?userId=${item.user_id}`} className="hover:text-primary hover:underline transition-colors">
-                                            <h3 className="font-semibold text-lg">{donorName}</h3>
-                                        </Link>
+                                        {!isGuest ? (
+                                            <Link href={`/listings?userId=${item.user_id}`} className="hover:text-primary hover:underline transition-colors">
+                                                <h3 className="font-semibold text-lg">{donorName}</h3>
+                                            </Link>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-semibold text-lg">{donorName}</h3>
+                                                <Badge variant="outline" className="text-xs font-normal bg-muted/50">زائر</Badge>
+                                            </div>
+                                        )}
                                         {profile && (
                                             <div className="mt-1">
                                                 <UserRatingBadge
@@ -322,7 +352,7 @@ export default async function ItemDetails(props: { params: Params }) {
                                         </a>
                                     </Button>
 
-                                    {profile?.email && (
+                                    {contactEmail && (
                                         <Button variant="outline" size="lg" className="w-full gap-2 border-border/60 hover:bg-muted/50" asChild>
                                             <a href={emailLink}>
                                                 <Mail className="h-5 w-5 text-muted-foreground" />

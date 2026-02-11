@@ -12,7 +12,6 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Loader2 } from 'lucide-react'
-import { useState } from "react"
 
 interface AppealFormProps {
     initialData?: {
@@ -28,7 +27,10 @@ interface AppealFormProps {
     submitLabel?: string
 }
 
-const categories = [
+import { createClient } from "@/lib/supabase"
+import { useEffect, useState } from "react"
+
+const hardcodedCategories = [
     'Medical',
     'Financial',
     'Education',
@@ -39,6 +41,27 @@ const categories = [
 ]
 
 export function AppealForm({ initialData, action, isPending, submitLabel = "إرسال الطلب" }: AppealFormProps) {
+    const [categories, setCategories] = useState<any[]>([])
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const supabase = createClient()
+            const { data, error } = await supabase
+                .from('appeal_categories')
+                .select('name')
+                .eq('is_active', true)
+                .order('name')
+
+            if (!error && data) {
+                setCategories(data)
+            } else {
+                // Fallback if fetch fails
+                setCategories(hardcodedCategories.map(c => ({ name: c })))
+            }
+        }
+        fetchCategories()
+    }, [])
+
     return (
         <form action={action} className="space-y-6 text-right" dir="rtl">
             <div className="space-y-2">
@@ -61,8 +84,8 @@ export function AppealForm({ initialData, action, isPending, submitLabel = "إر
                     </SelectTrigger>
                     <SelectContent>
                         {categories.map((cat) => (
-                            <SelectItem key={cat} value={cat}>
-                                {cat}
+                            <SelectItem key={cat.name} value={cat.name}>
+                                {cat.name}
                             </SelectItem>
                         ))}
                     </SelectContent>

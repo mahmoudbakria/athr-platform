@@ -239,7 +239,14 @@ export function ItemRegistry({ items, categories }: { items: Item[], categories:
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-medium">{item.title}</div>
+                                            <div className="font-medium flex items-center gap-2">
+                                                {item.title}
+                                                {item.item_number && (
+                                                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-sm">
+                                                        #{item.item_number}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="text-xs text-muted-foreground line-clamp-1">{item.description}</div>
                                             <div className="text-[10px] text-muted-foreground mt-1">
                                                 {format(new Date(item.created_at), 'yyyy-MM-dd')}
@@ -259,15 +266,16 @@ export function ItemRegistry({ items, categories }: { items: Item[], categories:
                                                     <span className="text-xs group-hover:text-blue-600 transition-colors">{user.full_name || 'User'}</span>
                                                 </a>
                                             ) : (
-                                                <div
-                                                    className="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-1 rounded transition-colors group"
-                                                    onClick={() => setUserFilter('guest')}
-                                                    title="Filter by Guests"
-                                                >
-                                                    <Avatar className="w-6 h-6 bg-slate-100">
-                                                        <AvatarFallback className="text-[10px] text-slate-500">G</AvatarFallback>
+                                                <div className="flex items-center gap-2 p-1">
+                                                    <Avatar className="w-6 h-6 bg-amber-100">
+                                                        <AvatarFallback className="text-[10px] text-amber-600">G</AvatarFallback>
                                                     </Avatar>
-                                                    <span className="text-xs group-hover:text-blue-600 transition-colors text-muted-foreground italic">Guest</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-medium text-slate-700">{(item as any).guest_name || 'Guest'}</span>
+                                                        <Badge variant="outline" className="text-[10px] w-fit px-1 py-0 h-4 border-amber-200 text-amber-700 bg-amber-50">
+                                                            Guest
+                                                        </Badge>
+                                                    </div>
                                                 </div>
                                             )}
                                         </TableCell>
@@ -357,9 +365,19 @@ export function ItemRegistry({ items, categories }: { items: Item[], categories:
                                                     asChild
                                                     title="View Item"
                                                 >
-                                                    <a href={`/admin/items/${item.id}`}>
+                                                    <a href={`/items/${item.item_number || item.id}`} target="_blank" rel="noopener noreferrer">
                                                         <Eye className="h-4 w-4" />
                                                     </a>
+                                                </Button>
+
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => setItemToDelete(item.id)}
+                                                    title="Permanently Delete"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>

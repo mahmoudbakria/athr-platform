@@ -30,29 +30,15 @@ import { supabase } from "@/lib/supabase"
 import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import imageCompression from 'browser-image-compression'
-import { X, Tag } from "lucide-react"
+import { X, Tag, CheckCircle2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import dynamic from 'next/dynamic'
 import NextImage from 'next/image'
+import { createItem } from "@/app/items/actions"
 
 const LocationPicker = dynamic(() => import('@/components/form/LocationPicker').then(mod => mod.LocationPicker), {
     ssr: false,
     loading: () => <div className="h-[300px] w-full bg-slate-100 rounded-md animate-pulse flex items-center justify-center text-slate-400">تحميل الخريطة...</div>
-})
-
-const formSchema = z.object({
-    title: z.string().min(2, "يجب أن يكون العنوان حرفين على الأقل."),
-    description: z.string().min(10, "يجب أن يكون الوصف 10 أحرف على الأقل."),
-    city: z.string().min(2, "المدينة مطلوبة."),
-    category_id: z.string().min(1, "يرجى اختيار التصنيف."),
-    sub_category_id: z.string().optional(),
-    contact_phone: z.string().min(5, "رقم الهاتف مطلوب."),
-    condition: z.enum(['new', 'like_new', 'used']).optional(),
-    delivery_available: z.boolean().default(false).optional(),
-    needs_repair: z.boolean().default(false).optional(),
-    tags: z.array(z.string()).optional(),
-    latitude: z.number().optional(),
-    longitude: z.number().optional()
 })
 
 interface ItemFormProps {
@@ -62,15 +48,72 @@ interface ItemFormProps {
         maintenance: boolean
     }
     initialData?: any // Item to edit
+    user?: any
 }
 
-export function ItemForm({ categories, subCategories, featureFlags, initialData }: ItemFormProps) {
+export function ItemForm({ categories, subCategories, featureFlags, initialData, user }: ItemFormProps) {
     const router = useRouter()
     const [images, setImages] = useState<File[]>([])
     const [previews, setPreviews] = useState<string[]>(initialData?.images || [])
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [tags, setTags] = useState<string[]>(initialData?.tags || [])
     const [tagInput, setTagInput] = useState("")
+    const [createdItemNumber, setCreatedItemNumber] = useState<number | null>(null)
+    const [isSuccess, setIsSuccess] = useState(false)
+
+    const handleReset = () => {
+        setIsSuccess(false)
+        setCreatedItemNumber(null)
+        form.reset({
+            title: "",
+            description: "",
+            city: "",
+            contact_phone: "",
+            condition: undefined,
+            needs_repair: false,
+            delivery_available: false,
+            tags: [],
+            category_id: "",
+            sub_category_id: "",
+            latitude: undefined,
+            longitude: undefined,
+            guest_name: "",
+            guest_email: ""
+        })
+        setImages([])
+        setPreviews([])
+        setTags([])
+        setTagInput("")
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    const formSchema = useMemo(() => {
+        const baseSchema = z.object({
+            title: z.string().min(2, "يجب أن يكون العنوان حرفين على الأقل."),
+            description: z.string().min(10, "يجب أن يكون الوصف 10 أحرف على الأقل."),
+            city: z.string().min(2, "المدينة مطلوبة."),
+            category_id: z.string().min(1, "يرجى اختيار التصنيف."),
+            sub_category_id: z.string().optional(),
+            contact_phone: z.string().min(5, "رقم الهاتف مطلوب."),
+            condition: z.enum(['new', 'like_new', 'used']).optional(),
+            delivery_available: z.boolean().default(false).optional(),
+            needs_repair: z.boolean().default(false).optional(),
+            tags: z.array(z.string()).optional(),
+            latitude: z.number().optional(),
+            longitude: z.number().optional(),
+            guest_name: z.string().optional(),
+            guest_email: z.string().optional(),
+        })
+
+        if (!user && !initialData) {
+            return baseSchema.extend({
+                guest_name: z.string().min(2, "الاسم مطلوب للزوار."),
+                guest_email: z.string().email("البريد الإلكتروني غير صحيح.").or(z.literal("")),
+            })
+        }
+
+        return baseSchema
+    }, [user, initialData])
 
     const defaultValues = {
         title: initialData?.title || "",
@@ -84,7 +127,9 @@ export function ItemForm({ categories, subCategories, featureFlags, initialData 
         category_id: initialData?.category_id || "",
         sub_category_id: initialData?.sub_category_id ? initialData.sub_category_id.toString() : "",
         latitude: initialData?.latitude || undefined,
-        longitude: initialData?.longitude || undefined
+        longitude: initialData?.longitude || undefined,
+        guest_name: "",
+        guest_email: ""
     }
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -166,6 +211,8 @@ export function ItemForm({ categories, subCategories, featureFlags, initialData 
                 images: finalImages,
                 status: 'pending',
                 user_id: user?.id || null,
+                guest_name: user ? null : (values as any).guest_name,
+                guest_email: user ? null : ((values as any).guest_email || null),
                 latitude: values.latitude,
                 longitude: values.longitude
             }
@@ -180,10 +227,12 @@ export function ItemForm({ categories, subCategories, featureFlags, initialData 
                 toast.success("تم تحديث الغرض بنجاح!", { description: "التغييرات قيد المراجعة." })
                 router.push('/my-items')
             } else {
-                const { error } = await supabase.from('items').insert(payload)
-                if (error) throw error
-                toast.success("تم التبرع بالغرض بنجاح!", { description: "غرضك قيد المراجعة. شكراً لك!" })
-                router.push('/my-items')
+                const result = await createItem(payload)
+                if (result.itemNumber) {
+                    setCreatedItemNumber(result.itemNumber)
+                }
+                setIsSuccess(true)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
             }
 
             router.refresh()
@@ -236,6 +285,44 @@ export function ItemForm({ categories, subCategories, featureFlags, initialData 
 
     const removeTag = (tagToRemove: string) => {
         setTags(tags.filter(tag => tag !== tagToRemove))
+    }
+
+    if (isSuccess) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-6 animate-in fade-in zoom-in duration-300">
+                <div className="rounded-full bg-green-100 p-6">
+                    <CheckCircle2 className="w-16 h-16 text-green-600" />
+                </div>
+                <div className="space-y-4">
+                    <h2 className="text-3xl font-bold text-gray-900">تم استلام طلبك بنجاح!</h2>
+                    {createdItemNumber && (
+                        <div className="py-2">
+                            <Badge variant="outline" className="text-xl px-4 py-1 border-primary/20 bg-primary/5 text-primary">
+                                #{createdItemNumber}
+                            </Badge>
+                        </div>
+                    )}
+                    <p className="text-gray-500 max-w-md mx-auto text-lg leading-relaxed">
+                        شكراً لمساهمتك الكريمة. سيتم مراجعة الغرض ونشره قريباً ليتاح للمحتاجين.
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 w-full mx-auto">
+                    <Button
+                        variant="outline"
+                        onClick={handleReset}
+                        className="w-full sm:w-auto min-w-[200px] h-12 text-lg border-2"
+                    >
+                        إضافة غرض آخر
+                    </Button>
+                    <Button
+                        onClick={() => router.push(user ? '/my-items' : '/')}
+                        className="w-full sm:w-auto min-w-[200px] h-12 text-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
+                    >
+                        {user ? 'الذهاب إلى أغراضي' : 'العودة للرئيسية'}
+                    </Button>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -422,6 +509,37 @@ export function ItemForm({ categories, subCategories, featureFlags, initialData 
                         </div>
                         <p className="text-xs text-muted-foreground">اضغط Enter لإضافة الوسم.</p>
                     </div>
+
+                    {!user && !initialData && (
+                        <>
+                            <FormField
+                                control={form.control}
+                                name="guest_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>الاسم الكامل</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="الاسم الكريم" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="guest_email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>البريد الإلكتروني (اختياري)</FormLabel>
+                                        <FormControl>
+                                            <Input type="email" placeholder="example@domain.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
 
                     <FormField
                         control={form.control}

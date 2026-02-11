@@ -50,18 +50,25 @@ export default async function AdminItemDetailsPage({ params }: { params: Promise
     })
 
     // 2. Fetch Profile Data (Donor Info)
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url, show_avatar, email, phone')
-        .eq('id', typedItem.user_id)
-        .single()
+    const { data: profile } = typedItem.user_id
+        ? await supabase
+            .from('profiles')
+            .select('full_name, avatar_url, show_avatar, email, phone')
+            .eq('id', typedItem.user_id)
+            .single()
+        : { data: null }
 
     const whatsappLink = `https://wa.me/${typedItem.contact_phone}?text=${encodeURIComponent(`Hello, I am interested in your item: ${typedItem.title}`)}`
-    const emailLink = profile?.email ? `mailto:${profile.email}?subject=${encodeURIComponent(`Inquiry about: ${typedItem.title}`)}` : '#'
+
+    // Determine contact email
+    const contactEmail = profile?.email || (typedItem as any).guest_email
+    const emailLink = contactEmail ? `mailto:${contactEmail}?subject=${encodeURIComponent(`Inquiry about: ${typedItem.title}`)}` : '#'
 
     // Donor Display Logic
-    const showAvatar = profile?.show_avatar ?? true // Default to true if not set
-    const donorName = profile?.full_name || 'Anonymous Donor'
+    const isGuest = !typedItem.user_id
+    const showAvatar = isGuest ? true : (profile?.show_avatar ?? true)
+    const donorName = isGuest ? ((typedItem as any).guest_name || 'Guest Visitor') : (profile?.full_name || 'Anonymous Donor')
+
     const donorInitials = donorName
         .split(' ')
         .map((n: string) => n[0])
@@ -229,6 +236,7 @@ export default async function AdminItemDetailsPage({ params }: { params: Promise
                                             <p className="text-sm text-muted-foreground font-medium">Donated by</p>
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-semibold text-lg">{donorName}</h3>
+                                                {isGuest && <Badge variant="outline" className="text-xs font-normal bg-amber-50 text-amber-700 border-amber-200">Guest</Badge>}
                                             </div>
                                             <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                                                 <Phone className="h-3.5 w-3.5" />
@@ -245,7 +253,7 @@ export default async function AdminItemDetailsPage({ params }: { params: Promise
                                             Chat on WhatsApp
                                         </Button>
 
-                                        {profile?.email && (
+                                        {contactEmail && (
                                             <Button variant="outline" size="lg" className="w-full gap-2 border-border/60 hover:bg-muted/50" disabled>
                                                 <Mail className="h-5 w-5 text-muted-foreground" />
                                                 Send Email

@@ -61,7 +61,7 @@ export function ItemCard({ item, showRepairBadge = false }: ItemCardProps) {
     return (
         <article className="block h-full group" dir="rtl">
             <Card className="h-full overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl bg-card relative p-0 gap-0">
-                <Link href={`/items/${item.id}`} className="absolute inset-0 z-10" aria-label={`View ${item.title}`} />
+                <Link href={`/items/${item.item_number || item.id}`} className="absolute inset-0 z-10" aria-label={`View ${item.title}`} />
                 {/* Image Section */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                     <Image
@@ -135,7 +135,7 @@ export function ItemCard({ item, showRepairBadge = false }: ItemCardProps) {
 
                     {/* Title & Price/Status Row */}
                     <div className="flex justify-between items-start gap-1.5 relative z-20">
-                        <Link href={`/items/${item.id}`} className="font-bold text-[15px] leading-normal text-foreground line-clamp-1 group-hover:text-primary transition-colors pb-1">
+                        <Link href={`/items/${item.item_number || item.id}`} className="font-bold text-[15px] leading-normal text-foreground line-clamp-1 group-hover:text-primary transition-colors pb-1">
                             {item.title}
                         </Link>
                     </div>

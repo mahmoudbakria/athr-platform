@@ -175,7 +175,7 @@ export async function updateAppeal(id: string, prevState: any, formData: FormDat
         }
 
         revalidatePath('/my-appeals')
-        revalidatePath('/admin/appeals')
+        revalidatePath('/admin/appeal-requests')
         revalidatePath('/appeals')
         return { success: true, error: null }
     } catch (err: any) {
@@ -253,7 +253,7 @@ export async function deleteAppeal(id: string) {
         }
 
         revalidatePath('/my-appeals')
-        revalidatePath('/admin/appeals')
+        revalidatePath('/admin/appeal-requests')
         revalidatePath('/appeals')
         return { success: true, error: null }
     } catch (err: any) {

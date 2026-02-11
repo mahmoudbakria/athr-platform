@@ -90,7 +90,7 @@ export const getCachedLatestItems = unstable_cache(
         const { data } = await supabase
             .from('items')
             .select(`
-                id, title, city, created_at, images, description, latitude, longitude, user_id, status, condition,
+                id, title, city, created_at, images, description, latitude, longitude, user_id, status, condition, item_number,
                 categories!inner(name, slug),
                 sub_categories(name),
                 profiles(id, full_name, avatar_url)
@@ -147,7 +147,7 @@ export const getCachedCategoriesWithItems = unstable_cache(
         const { data: allItems } = await supabase
             .from('items')
             .select(`
-                id, title, category_id, city, created_at, images, description, latitude, longitude, user_id, status, condition,
+                id, title, category_id, city, created_at, images, description, latitude, longitude, user_id, status, condition, item_number,
                 categories!inner(name, slug),
                 sub_categories(name),
                 profiles(id, full_name, avatar_url)
@@ -192,10 +192,11 @@ export const getCachedItemById = unstable_cache(
                 id, title, description, images, created_at, city,
                 latitude, longitude, user_id, status, condition,
                 delivery_available, needs_repair, contact_phone, tags,
+                guest_name, guest_email, item_number,
                 categories(name, slug),
                 sub_categories(name)
             `)
-            .eq('id', id)
+            .eq(id.match(/^\d+$/) ? 'item_number' : 'id', id)
             .single()
 
         if (error || !data) return null
@@ -244,7 +245,7 @@ export const getPaginatedItems = unstable_cache(
         const { data } = await supabase
             .from('items')
             .select(`
-                id, title, city, created_at, images, description, latitude, longitude, user_id, status, condition, category_id,
+                id, title, city, created_at, images, description, latitude, longitude, user_id, status, condition, category_id, item_number,
                 categories (
                     name,
                     slug

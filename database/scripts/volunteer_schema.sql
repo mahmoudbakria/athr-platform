@@ -27,7 +27,11 @@ alter table public.volunteer_deliveries enable row level security;
 
 -- 4. Policies
 
--- Public: No access (internal system for now, unless we want to show available volunteers publicly later)
+-- Public: Read access for approved deliveries
+drop policy if exists "Anyone can read approved volunteer deliveries" on public.volunteer_deliveries;
+create policy "Anyone can read approved volunteer deliveries"
+  on public.volunteer_deliveries for select
+  using ( status = 'approved' );
 
 -- Users: Create Own
 drop policy if exists "Users can create volunteer requests" on public.volunteer_deliveries;

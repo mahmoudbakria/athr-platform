@@ -11,12 +11,14 @@ import { useActionState, useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
 import { FcGoogle } from "react-icons/fc"
 import { Loader2 } from "lucide-react"
+import { RegistrationSuccess } from "./RegistrationSuccess"
 
 import { useSearchParams } from "next/navigation"
 
 const initialState = {
     error: '',
-    success: false
+    success: false,
+    email: ''
 }
 
 export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?: 'login' | 'signup', errorMessage?: string }) {
@@ -36,9 +38,10 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
 
     // Signup Action State
     const [signupState, signupAction, signupPending] = useActionState(async (prevState: any, formData: FormData) => {
+        const email = formData.get('email') as string
         const result = await signup(formData)
-        if (result?.error) return { error: result.error }
-        return { error: '' }
+        if (result?.error) return { error: result.error, success: false }
+        return { error: '', success: true, email }
     }, initialState)
 
 
@@ -68,6 +71,14 @@ export function AuthForm({ initialMode = 'login', errorMessage }: { initialMode?
         } finally {
             setGoogleLoading(false)
         }
+    }
+
+    if (signupState.success && signupState.email) {
+        return (
+            <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-muted/20 p-4">
+                <RegistrationSuccess email={signupState.email} />
+            </div>
+        )
     }
 
     return (

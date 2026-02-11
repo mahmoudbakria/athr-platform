@@ -14,8 +14,16 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { Badge } from '@/components/ui/badge'
-import { Plus, Loader2, Trash2 } from 'lucide-react'
+import { Plus, Loader2, Trash2, Pencil } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation'
@@ -35,6 +43,10 @@ export default function AppealCategoriesPage() {
     const [loading, setLoading] = useState(true)
     const [newCategory, setNewCategory] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    // Edit state
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+    const [editName, setEditName] = useState('')
 
     const fetchCategories = async () => {
         setLoading(true)
@@ -61,7 +73,7 @@ export default function AppealCategoriesPage() {
 
         setIsSubmitting(true)
         const name = newCategory.trim()
-        const slug = name // Keep simple for now, can be slugified if needed but requirements used Name as keys
+        const slug = name
 
         const { error } = await supabase
             .from('appeal_categories')
@@ -73,6 +85,30 @@ export default function AppealCategoriesPage() {
             toast.success("Category added")
             setNewCategory('')
             fetchCategories()
+            router.refresh()
+        }
+        setIsSubmitting(false)
+    }
+
+    const handleUpdateCategory = async () => {
+        if (!editingCategory || !editName.trim()) return
+
+        setIsSubmitting(true)
+
+        const { error } = await supabase
+            .from('appeal_categories')
+            .update({
+                name: editName.trim(),
+                slug: editName.trim()
+            })
+            .eq('id', editingCategory.id)
+
+        if (error) {
+            toast.error(error.message || "Failed to update category")
+        } else {
+            toast.success("Category updated")
+            fetchCategories()
+            setEditingCategory(null)
             router.refresh()
         }
         setIsSubmitting(false)
@@ -156,6 +192,16 @@ export default function AppealCategoriesPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    onClick={() => {
+                                                        setEditingCategory(cat)
+                                                        setEditName(cat.name)
+                                                    }}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     onClick={() => deleteCategory(cat.id)}
                                                     className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                                                 >
@@ -203,6 +249,33 @@ export default function AppealCategoriesPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Category</DialogTitle>
+                        <DialogDescription>Update the category name.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="edit-name" className="text-right">Name</Label>
+                            <Input
+                                id="edit-name"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="col-span-3"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setEditingCategory(null)}>Cancel</Button>
+                        <Button onClick={handleUpdateCategory} disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Changes
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

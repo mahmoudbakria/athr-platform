@@ -103,6 +103,13 @@ export function Navbar({ categories, user, profile, logoUrl, enableGamification,
                 <Truck className="h-6 w-6" />
               </Link>
             </Button>
+            <Button asChild className="hidden md:flex gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200 shadow-md transition-all hover:scale-105">
+              <Link href="/donate">
+                <Heart className="h-4 w-4 fill-current" />
+                <span>تبرع الآن</span>
+              </Link>
+            </Button>
+
             <Button asChild variant="outline" className="hidden md:flex gap-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
               <Link href="/volunteer/create">
                 <Truck className="h-4 w-4" />

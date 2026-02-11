@@ -1,4 +1,5 @@
 import { getCachedCategories, getCachedSubCategories, getCachedSystemSettings } from '@/lib/fetchers'
+import { createClient } from '@/lib/supabase-server'
 import { ItemForm } from '@/components/items/ItemForm'
 
 export const revalidate = 60
@@ -15,6 +16,10 @@ export default async function DonatePage() {
     const maintenance = settings.find(s => s.key === 'feature_maintenance')?.value || false
 
 
+    // Fetch User
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-2xl mx-auto mb-8 text-center pt-8">
@@ -28,6 +33,7 @@ export default async function DonatePage() {
                 categories={categories}
                 subCategories={subCategories as any}
                 featureFlags={{ maintenance }}
+                user={user}
             />
         </div>
     )

@@ -39,6 +39,7 @@ export interface Item {
         full_name: string | null
         avatar_url: string | null
     } | null
+    item_number?: number
 }
 
 export interface SubCategory {

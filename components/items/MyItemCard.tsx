@@ -108,7 +108,7 @@ export function MyItemCard({ item, layout = 'grid' }: MyItemCardProps) {
 
                     <div className="flex items-center gap-2 mt-auto md:mt-0 shrink-0">
                         <Button variant="outline" size="sm" className="h-9" asChild>
-                            <Link href={`/items/${item.id}`}>
+                            <Link href={`/items/${item.item_number || item.id}`}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 View
                             </Link>
@@ -196,7 +196,7 @@ export function MyItemCard({ item, layout = 'grid' }: MyItemCardProps) {
 
                 <div className="mt-auto flex gap-2">
                     <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
-                        <Link href={`/items/${item.id}`}>
+                        <Link href={`/items/${item.item_number || item.id}`}>
                             <Eye className="h-3 w-3 mr-1.5" />
                             View
                         </Link>

@@ -11,6 +11,7 @@ export default async function ItemsPage() {
         .from('items')
         .select(`
             *,
+            item_number,
             profiles:user_id (
                 id,
                 full_name,

@@ -55,14 +55,24 @@ export async function signup(formData: FormData) {
         return { error: error.message }
     }
 
-    revalidatePath('/', 'layout')
+    return { success: true }
+}
 
-    const next = formData.get('next') as string
-    if (next && next.startsWith('/')) {
-        redirect(next)
+export async function resendVerificationEmail(email: string) {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+            emailRedirectTo: 'https://www.athrk.com/auth/callback'
+        }
+    })
+
+    if (error) {
+        return { error: error.message }
     }
 
-    redirect('/')
+    return { success: true }
 }
 
 export async function logout() {

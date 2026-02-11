@@ -97,16 +97,23 @@ export async function createItem(itemData: any) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) throw new Error("Unauthorized")
+    // Allow anonymous users to create items
+    // if (!user) throw new Error("Unauthorized")
+
+    // Prepare payload based on auth status
+    const payload = {
+        ...itemData,
+        user_id: user?.id || null,
+        status: 'pending',
+        // For registered users, ensure guest fields are null
+        guest_name: user ? null : itemData.guest_name,
+        guest_email: user ? null : itemData.guest_email,
+    }
 
     // Insert Item
     const { data, error } = await supabase
         .from('items')
-        .insert({
-            ...itemData,
-            user_id: user.id,
-            status: 'pending'
-        })
+        .insert(payload)
         .select()
         .single()
 
@@ -115,5 +122,5 @@ export async function createItem(itemData: any) {
     // Award points logic moved to admin approval
     // See: app/admin/actions.ts -> updateItemStatus
 
-    return { success: true, itemId: data.id }
+    return { success: true, itemId: data.id, itemNumber: data.item_number }
 }

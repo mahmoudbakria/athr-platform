@@ -48,7 +48,7 @@ export default async function AdminAppealsPage() {
                         <p className="text-muted-foreground">Manage and moderate community help requests.</p>
                     </div>
                     <Button asChild variant="outline">
-                        <Link href="/admin/appeals/categories">Manage Categories</Link>
+                        <Link href="/admin/appeal-requests/categories">Manage Categories</Link>
                     </Button>
                 </div>
                 <span className="text-sm text-muted-foreground">
