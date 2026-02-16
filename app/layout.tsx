@@ -8,6 +8,7 @@ import { UserLocationProvider } from "@/context/UserLocationContext";
 import { createClient } from "@/lib/supabase-server";
 import { siteConfig as staticSiteConfig } from "@/config/site";
 import { getCachedCategories, getCachedSiteConfig, getCachedSystemSettings } from "@/lib/fetchers";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -127,6 +128,7 @@ export default async function RootLayout({
           <Footer />
           <Toaster />
         </UserLocationProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
